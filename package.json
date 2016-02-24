@@ -1,0 +1,25 @@
+{
+  "name": "koa-grace-proxy",
+  "version": "1.0.5",
+  "description": "KOA-grace代理请求、数据、上传的中间件",
+  "main": "index.js",
+  "scripts": {
+    "test": "DEBUG=* node --harmony ./example/app"
+  },
+  "keywords": [
+    "koa",
+    "proxy",
+    "grace-proxy"
+  ],
+  "dependencies": {
+    "koa": "^1.1.2",
+    "request": "^2.69.0",
+    "thunkify": "^2.1.2"
+  },
+  "devDependencies": {
+    "debug": "^2.2.0"
+  },
+  "author": "wilee",
+  "license": "MIT",
+  "repository": "https://github.com/koa-grace/koa-grace-proxy.git"
+}
