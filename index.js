@@ -79,16 +79,16 @@ function proxy(app, options) {
 
   return function*(next) {
     if (this.proxy) return yield next
-    /**
-     * proxy
-     * @param {object} opt 需要并发请求的url，例如:{user1: 'local:/data/1',user2: 'local:/data/2'}
-     */
+      /**
+       * proxy
+       * @param {object} opt 需要并发请求的url，例如:{user1: 'local:/data/1',user2: 'local:/data/2'}
+       */
 
     let ctx = this;
     let req = ctx.req;
     let res = ctx.res;
 
-    function _getPath(_url){
+    function _getPath(_url) {
       let query = ctx.query;
 
       let urlObj = _analyurl(_url);
@@ -100,17 +100,17 @@ function proxy(app, options) {
       ctx.headers['user-host'] = ctx.headers.host;
 
       return {
-        url:url,
-        method:method
+        url: url,
+        method: method
       }
     }
 
-    function _getHeaders(url){
+    function _getHeaders(url) {
       let result = {};
       let headers = ctx.headers || {};
 
-      for(let item in headers){
-        if(headers.hasOwnProperty(item)){
+      for (let item in headers) {
+        if (headers.hasOwnProperty(item)) {
           result[item] = headers[item];
         }
       }
@@ -122,9 +122,9 @@ function proxy(app, options) {
     }
 
     Object.assign(this, {
-      proxy : function* (opt, destObj){
-        if(!destObj){
-          destObj = ctx.backData = (ctx.backData || {});  
+      proxy: function*(opt, destObj) {
+        if (!destObj) {
+          destObj = ctx.backData = (ctx.backData || {});
         }
 
         let reqs = [];
@@ -135,15 +135,15 @@ function proxy(app, options) {
 
           reqs.push({
             destObj: destObj,
-            item: item, 
-            url: urlObj.url, 
+            item: item,
+            url: urlObj.url,
             method: urlObj.method,
             headers: headers
           });
         }
 
-        function* _proxy(opt){
-          let response = yield coProxy(opt.url,{
+        function* _proxy(opt) {
+          let response = yield coProxy(opt.url, {
             req: req,
             res: res,
             method: opt.method,
@@ -162,32 +162,33 @@ function proxy(app, options) {
 
         return result;
       },
-      download : function* (url){
+      download: function*(url) {
         // 获取请求url
         let _url = _getPath(url).url;
         // 获取头信息
         let _headers = _getHeaders(_url);
 
-        let data = yield coProxy(_url,{
+        let data = yield coProxy(_url, {
           req: req,
           res: res,
-          needPipeRes : true,
-          headers : _headers
+          needPipeRes: true,
+          headers: _headers
         });
         return data;
       },
       // TO DO：上传功能待完成
-      upload : function* (url){
+      upload: function*(url) {
         // 获取请求url
         let _url = _getPath(url).url;
         // 获取头信息
         let _headers = _getHeaders(_url);
 
-        let data = yield coProxy(_url,{
+        let data = yield coProxy(_url, {
           req: req,
           res: res,
-          needPipeRes : true,
-          headers : _headers
+          needPipeReq: true,
+          needPipeRes: false,
+          headers: _headers
         });
         return data;
       }
