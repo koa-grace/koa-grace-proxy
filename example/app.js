@@ -7,23 +7,23 @@ var app = koa();
 
 // 配置api
 app.use(proxy(app, {
-  api : {
-    github : 'https://avatars.githubusercontent.com/'
+  api: {
+    github: 'https://avatars.githubusercontent.com/'
   }
 }));
 
 app.use(function*() {
-  let data ;
+  let data;
 
   // 数据请求
-  if(this.path == '/data/1'){
+  if (this.path == '/data/1') {
     this.body = {
-      user_id:'111111'
+      user_id: '111111'
     }
     return;
-  }else if(this.path == '/data/2'){
+  } else if (this.path == '/data/2') {
     this.body = {
-      user_id:'222222'
+      user_id: '222222'
     }
     return;
   }
@@ -31,8 +31,9 @@ app.use(function*() {
 
   // 代理数据
   yield this.proxy({
-    data1 : 'http://127.0.0.1:3000/data/1',
-    data2 : 'http://127.0.0.1:3000/data/2',
+    data1: 'http://127.0.0.1:3000/data/1',
+    data2: 'http://127.0.0.1:3000/data/2',
+    data3: 'http://test'
   });
   this.body = this.backData || 'test';
 

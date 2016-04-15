@@ -69,7 +69,12 @@ function proxy(app, options) {
 
         return result;
       },
-      download: function*(url) {
+      /**
+       * 从其他server通过http的方式拉取资源
+       * @param {String} url           请求url
+       * @yield {Object} 返回数据 
+       */
+      fetch: function*(url) {
         // 获取请求url
         let urlObj = analyUrl(url);
         // 获取头信息
@@ -80,22 +85,6 @@ function proxy(app, options) {
           res: res,
           needPipeReq: false,
           needPipeRes: true,
-          headers: realReq.headers
-        });
-        return data;
-      },
-      // TO DO：上传功能待完成
-      upload: function*(url) {
-        // 获取请求url
-        let urlObj = analyUrl(url);
-        // 获取头信息
-        let realReq = setRequest(ctx, urlObj);
-
-        let data = yield coProxy(realReq.url, {
-          req: req,
-          res: res,
-          needPipeReq: true,
-          needPipeRes: false,
           headers: realReq.headers
         });
         return data;
