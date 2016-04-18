@@ -1,7 +1,7 @@
 {
   "name": "koa-grace-proxy",
-  "version": "1.0.9",
-  "description": "KOA-grace代理请求、数据、上传的中间件",
+  "version": "1.0.10",
+  "description": "KOA-grace proxy/fetch请求、的中间件",
   "main": "index.js",
   "scripts": {
     "test": "DEBUG=* node --harmony ./example/app"

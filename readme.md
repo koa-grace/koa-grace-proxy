@@ -57,9 +57,9 @@ app.use(function*() {
   this.body = this.backData || 'test';
 
   // 代理请求
-  // yield this.download('github:u/1962352?v=3');
-  // yield this.download('http://127.0.0.1:9080/bg_3_s.jpg');
-  // data = yield this.download('http://test.mlsfe.biz/home');
+  // yield this.proxy('github:u/1962352?v=3');
+  // yield this.proxy('http://127.0.0.1:9080/bg_3_s.jpg');
+  // data = yield this.proxy('http://test.mlsfe.biz/home');
 
   console.log('request done');
 });
