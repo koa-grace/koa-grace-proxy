@@ -7,10 +7,10 @@ var app = koa();
 
 // 配置api
 app.use(proxy(app, {
-  api: {
     github: 'https://avatars.githubusercontent.com/'
-  }
-}));
+  },{
+    timeout: 15000 // 超时时间
+  }));
 
 app.use(function*() {
   let data;

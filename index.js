@@ -8,13 +8,14 @@ const coProxy = require('./lib/co-proxy');
 /**
  * 
  * @param  {string} app     context
- * @param  {object} options 配置项
- *         {object} options.api api配置项，例如local对应http://localhost:3000，则为：api:{local:'http://localhost:3000'}
+ * @param  {object} api     api配置项
+ * @param  {object} options request配置项
  * @return {function}
  */
-function proxy(app, options) {
+function proxy(app, api ,options) {
 
-  let api = options.api;
+  api = api || {};
+  options = options || {};
 
   return function*(next) {
     if (this.proxy) return yield next
@@ -49,14 +50,17 @@ function proxy(app, options) {
         }
 
         function* _proxy(opt) {
-          let response = yield coProxy(opt.url, {
+          let response = yield coProxy({
             req: req,
             res: res,
+            needPipeReq: opt.needPipeReq,
+            needPipeRes: false
+          }, extend(options, {
+            uri: opt.url,
             method: opt.method,
             headers: opt.headers,
-            needPipeReq: opt.needPipeReq,
             json: true
-          });
+          }));
 
           // 将获取到的数据注入到上下文的destObj参数中
           opt.destObj[opt.item] = response[1];
@@ -80,13 +84,15 @@ function proxy(app, options) {
         // 获取头信息
         let realReq = setRequest(ctx, urlObj);
 
-        let data = yield coProxy(realReq.url, {
+        let data = yield coProxy({
           req: req,
           res: res,
           needPipeReq: false,
           needPipeRes: true,
+        }, extend(options, {
+          uri: realReq.url,
           headers: realReq.headers
-        });
+        }));
         return data;
       }
     });
