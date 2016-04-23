@@ -36,7 +36,7 @@ function proxy(app, api ,options) {
         let reqs = [];
         for (let item in opt) {
           // 分析当前proxy请求的URL
-          let urlObj = analyUrl(opt[item]);
+          let urlObj = analyUrl(ctx, opt[item]);
           let realReq = setRequest(ctx, urlObj);
 
           reqs.push({
@@ -80,7 +80,7 @@ function proxy(app, api ,options) {
        */
       fetch: function*(url) {
         // 获取请求url
-        let urlObj = analyUrl(url);
+        let urlObj = analyUrl(ctx, url);
         // 获取头信息
         let realReq = setRequest(ctx, urlObj);
 
@@ -152,7 +152,7 @@ function proxy(app, api ,options) {
    * @param  {url} path 请求url，例如：'github:user/info'
    * @return {Object}      返回真正的url和方法
    */
-  function analyUrl(path) {
+  function analyUrl(ctx, path) {
     let url, method;
 
     let isUrl = /^(http:\/\/|https:\/\/)/;
@@ -167,11 +167,11 @@ function proxy(app, api ,options) {
     switch (urlReg.length) {
       case 1:
         url = urlReg[0];
-        method = 'GET';
+        method = ctx.method;
         break
       case 2:
         url = api[urlReg[0]] + urlReg[1];
-        method = 'GET';
+        method = ctx.method;
         break;
       case 3:
         url = api[urlReg[0]] + urlReg[2];
