@@ -91,7 +91,9 @@ function proxy(app, api ,options) {
           needPipeRes: true,
         }, extend(options, {
           uri: realReq.url,
-          headers: realReq.headers
+          method: realReq.method,
+          headers: realReq.headers,
+          timeout: undefined
         }));
         return data;
       }
