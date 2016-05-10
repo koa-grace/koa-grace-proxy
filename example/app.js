@@ -7,10 +7,10 @@ var app = koa();
 
 // 配置api
 app.use(proxy(app, {
-    github: 'https://avatars.githubusercontent.com/'
-  },{
-    timeout: 15000 // 超时时间
-  }));
+  github: 'https://avatars.githubusercontent.com/'
+}, {
+  timeout: 15000 // 超时时间
+}));
 
 app.use(function*() {
   let data;
@@ -18,16 +18,24 @@ app.use(function*() {
   // 数据请求
   if (this.path == '/data/1') {
     this.body = {
-      user_id: '111111'
+      user_id: '111111',
+      cookie: this.cookies.get('test')
     }
+    this.cookies.set('test1', 'test1');
+    this.cookies.set('test2', 'test2');
     return;
   } else if (this.path == '/data/2') {
     this.body = {
       user_id: '222222'
     }
+    this.cookies.set('test2', 'test2')
     return;
+  } else if (this.path == '/fetch') {
+    yield this.fetch('http://127.0.0.1:3000/data/1');
+    return;
+  } else {
+    this.cookies.set('test', 'test');
   }
-
 
   // 代理数据
   yield this.proxy({
@@ -35,6 +43,9 @@ app.use(function*() {
     data2: 'http://127.0.0.1:3000/data/2',
     data3: 'http://test'
   });
+
+
+
   this.body = this.backData || 'test';
 
   // 代理请求

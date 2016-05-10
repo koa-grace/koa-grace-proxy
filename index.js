@@ -12,7 +12,7 @@ const coProxy = require('./lib/co-proxy');
  * @param  {object} options request配置项
  * @return {function}
  */
-function proxy(app, api ,options) {
+function proxy(app, api, options) {
 
   api = api || {};
   options = options || {};
@@ -65,6 +65,11 @@ function proxy(app, api ,options) {
           // 将获取到的数据注入到上下文的destObj参数中
           opt.destObj[opt.item] = response[1];
 
+          // 设置cookie
+          let proxyResponse = response[0] || {};
+          let proxyHeaders = proxyResponse.headers;
+          setResCookies(ctx, proxyHeaders)
+
           return opt.destObj;
         }
 
@@ -95,6 +100,7 @@ function proxy(app, api ,options) {
           headers: realReq.headers,
           timeout: undefined
         }));
+
         return data;
       }
     });
@@ -208,6 +214,24 @@ function proxy(app, api ,options) {
     urlStr += queStr ? ('?' + queStr) : '';
 
     return urlStr;
+  }
+
+  /**
+   * 设置response cookie
+   * @param {object} res     response
+   * @param {object} headers 头信息
+   */
+  function setResCookies(ctx, headers) {
+    if (!headers || !headers['set-cookie']) {
+      return
+    }
+    
+    let cookies = headers['set-cookie'];
+    
+    ctx.res._headers = ctx.res._headers || {};
+    ctx.res._headers['set-cookie'] = ctx.res._headers['set-cookie'] || [];
+
+    ctx.res._headers['set-cookie'] = ctx.res._headers['set-cookie'].concat(cookies);
   }
 };
 
