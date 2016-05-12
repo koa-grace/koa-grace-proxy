@@ -1,5 +1,6 @@
 'use strict';
 
+const http = require('http');
 const querystring = require('querystring');
 const url_opera = require('url');
 const extend = require('util')._extend;
@@ -133,19 +134,11 @@ function proxy(app, api, options) {
     result['user-host'] = result.host;
     result.host = url_opera.parse(url).host;
 
-    let needPipeReq = true;
-    // 如果用户请求为POST，但proxy为GET，则删除头信息中不必要的字段
-    if (ctx.method == 'POST' && method == 'GET') {
-      result['content-type'] = undefined;
-      result['content-length'] = undefined;
-
-      needPipeReq = false;
-    }
-    /*else if(ctx.method == 'GET' && method == 'POST'){
+    // contenet-type为文件提交才需要pipe request
+    let needPipeReq = false
+    if (ctx.headers['content-type'] == 'multipart/form-data') {
       needPipeReq = true;
-    }else{
-
-    }*/
+    }
 
     return {
       method: method,
@@ -225,13 +218,11 @@ function proxy(app, api, options) {
     if (!headers || !headers['set-cookie']) {
       return
     }
-    
-    let cookies = headers['set-cookie'];
-    
-    ctx.res._headers = ctx.res._headers || {};
-    ctx.res._headers['set-cookie'] = ctx.res._headers['set-cookie'] || [];
 
-    ctx.res._headers['set-cookie'] = ctx.res._headers['set-cookie'].concat(cookies);
+    let cookies = headers['set-cookie'];
+    let setCookie = http.OutgoingMessage.prototype.setHeader;
+
+    setCookie.call(ctx.res, 'Set-Cookie', cookies)
   }
 };
 
