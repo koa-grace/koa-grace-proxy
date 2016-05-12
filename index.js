@@ -60,6 +60,7 @@ function proxy(app, api, options) {
             uri: opt.url,
             method: opt.method,
             headers: opt.headers,
+            form: ctx.request.body,
             json: true
           }));
 
@@ -99,6 +100,7 @@ function proxy(app, api, options) {
           uri: realReq.url,
           method: realReq.method,
           headers: realReq.headers,
+          form: ctx.request.body,
           timeout: undefined
         }));
 
