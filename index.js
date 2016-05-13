@@ -60,7 +60,6 @@ function proxy(app, api, options) {
             uri: opt.url,
             method: opt.method,
             headers: opt.headers,
-            form: ctx.request.body,
             json: true
           }));
 
@@ -100,7 +99,6 @@ function proxy(app, api, options) {
           uri: realReq.url,
           method: realReq.method,
           headers: realReq.headers,
-          form: ctx.request.body,
           timeout: undefined
         }));
 
@@ -136,10 +134,13 @@ function proxy(app, api, options) {
     result['user-host'] = result.host;
     result.host = url_opera.parse(url).host;
 
-    // contenet-type为文件提交才需要pipe request
-    let needPipeReq = false
-    if (ctx.headers['content-type'] == 'multipart/form-data') {
-      needPipeReq = true;
+    let needPipeReq = true;
+    // 如果用户请求为POST，但proxy为GET，则删除头信息中不必要的字段
+    if (ctx.method == 'POST' && method == 'GET') {
+      result['content-type'] = undefined;
+      result['content-length'] = undefined;
+
+      needPipeReq = false;
     }
 
     return {
@@ -222,9 +223,17 @@ function proxy(app, api, options) {
     }
 
     let cookies = headers['set-cookie'];
-    let setCookie = http.OutgoingMessage.prototype.setHeader;
 
-    setCookie.call(ctx.res, 'Set-Cookie', cookies)
+    ctx.res._headers = ctx.res._headers || {};
+    ctx.res._headerNames = ctx.res._headerNames || {};
+
+    // 以下set-cookie的方案参见nodejs源码：https://github.com/nodejs/node/blob/master/lib/_http_outgoing.js#L353-L359
+    // 设置头字段中set-cookie为对应cookie
+    ctx.res._headers['set-cookie'] = ctx.res._headers['set-cookie'] || [];
+    ctx.res._headers['set-cookie'] = ctx.res._headers['set-cookie'].concat(cookies);
+
+    // 设置头字段set-cookie的名称为set-cookie
+    ctx.res._headerNames['set-cookie'] = 'set-cookie';
   }
 };
 

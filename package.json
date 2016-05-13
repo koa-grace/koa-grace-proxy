@@ -1,6 +1,6 @@
 {
   "name": "koa-grace-proxy",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "KOA-grace proxy/fetch请求、的中间件",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "thunkify": "^2.1.2"
   },
   "devDependencies": {
+    "co-body": "^4.2.0",
     "debug": "^2.2.0",
     "koa-bodyparser": "^2.1.0"
   },
