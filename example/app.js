@@ -48,7 +48,7 @@ app.use(function*() {
       let body;
       if (this.req.headers['content-type'] == 'application/json') {
         body = yield cobody.json(this.req);
-      }else{
+      } else {
         body = yield cobody.form(this.req);
       }
 
@@ -64,7 +64,7 @@ app.use(function*() {
     case '/data/aj_post':
       yield this.proxy({
         local: 'local:post:data/post',
-        test:'test:post:auth/send_sms_code?user_phone=18101318121&action=register&captcha_code=vs8k1'
+        test: 'test:post:auth/send_sms_code'
       })
       this.body = this.backData;
       break;
@@ -88,18 +88,18 @@ $.ajax({
       data: '{"test4":"test4"}',
       method: 'post',
       contentType: 'application/json',
-      callback: function(data) {
+      success: function(data) {
         console.log(data);
       }
   });
-$.ajax({
-      url: '/data/aj_post',
-      data: {test:'test',test1:'test1'},
-      method: 'post',
-      callback: function(data) {
-        console.log(data);
-      }
-  });
+  
+$.post('/data/aj_post',{test:'test',test1:'test1'},function(data) {
+  console.log(data);
+});
+  
+$.get('/data/aj_post',{test:'test',test1:'test1'},function(data) {
+  console.log(data);
+});
 </script>
 `;
       break;

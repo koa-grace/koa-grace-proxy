@@ -52,8 +52,7 @@ function proxy(app, api, options) {
 
         function* _proxy(opt) {
           let response = yield coProxy({
-            req: req,
-            res: res,
+            ctx: ctx,
             needPipeReq: opt.needPipeReq,
             needPipeRes: false
           }, extend(options, {
@@ -91,8 +90,7 @@ function proxy(app, api, options) {
         let realReq = setRequest(ctx, urlObj);
 
         let data = yield coProxy({
-          req: req,
-          res: res,
+          ctx: ctx,
           needPipeReq: false,
           needPipeRes: true,
         }, extend(options, {
@@ -137,8 +135,8 @@ function proxy(app, api, options) {
     let needPipeReq = true;
     // 如果用户请求为POST，但proxy为GET，则删除头信息中不必要的字段
     if (ctx.method == 'POST' && method == 'GET') {
-      result['content-type'] = undefined;
-      result['content-length'] = undefined;
+      delete result['content-type'];
+      delete result['content-length'];
 
       needPipeReq = false;
     }
@@ -237,4 +235,4 @@ function proxy(app, api, options) {
   }
 };
 
-module.exports = proxy
+module.exports = proxy;
