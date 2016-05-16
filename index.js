@@ -35,48 +35,49 @@ function proxy(app, api, options) {
         }
 
         let reqs = [];
-        for (let item in opt) {
-          // 分析当前proxy请求的URL
-          let urlObj = analyUrl(ctx, opt[item]);
-          let realReq = setRequest(ctx, urlObj);
-
+        if (typeof opt == 'string') {
+          destObj = ctx;
           reqs.push({
-            destObj: destObj,
-            item: item,
-            url: realReq.url,
-            method: realReq.method,
-            headers: realReq.headers,
-            needPipeReq: realReq.needPipeReq
-          });
+            _url: opt,
+            _dest: 'body'
+          })
+        } else {
+          for (let item in opt) {
+            reqs.push({
+              _url: opt[item],
+              _dest: item
+            });
+          }
         }
 
         function* _proxy(opt) {
+          // 分析当前proxy请求的URL
+          let realReq = setRequest(ctx, opt._url);
+
           let response = yield coProxy({
             ctx: ctx,
-            needPipeReq: opt.needPipeReq,
+            needPipeReq: realReq.needPipeReq,
             needPipeRes: false
           }, extend(options, {
-            uri: opt.url,
-            method: opt.method,
-            headers: opt.headers,
+            uri: realReq.url,
+            method: realReq.method,
+            headers: realReq.headers,
             json: true
           }));
 
           // 将获取到的数据注入到上下文的destObj参数中
-          opt.destObj[opt.item] = response[1];
+          destObj[opt._dest] = response[1];
 
           // 设置cookie
           let proxyResponse = response[0] || {};
           let proxyHeaders = proxyResponse.headers;
           setResCookies(ctx, proxyHeaders)
 
-          return opt.destObj;
+          return destObj;
         }
 
         // 并发异步数据请求
-        let result = yield reqs.map(_proxy);
-
-        return result;
+        return yield reqs.map(_proxy);
       },
       /**
        * 从其他server通过http的方式拉取资源
@@ -84,10 +85,8 @@ function proxy(app, api, options) {
        * @yield {Object} 返回数据 
        */
       fetch: function*(url) {
-        // 获取请求url
-        let urlObj = analyUrl(ctx, url);
         // 获取头信息
-        let realReq = setRequest(ctx, urlObj);
+        let realReq = setRequest(ctx, url);
 
         let data = yield coProxy({
           ctx: ctx,
@@ -111,22 +110,24 @@ function proxy(app, api, options) {
   /**
    * 根据分析proxy url的结果和当前的req来分析最终的url/method/头信息
    * @param {Object} ctx koa上下文
-   * @param {Object} urlObj {url:'',method:''}
+   * @param {Object} path 请求路径
    */
-  function setRequest(ctx, urlObj) {
+  function setRequest(ctx, path) {
     let headers = ctx.headers || {};
     let query = ctx.query;
 
+    // 获取实际要请求的method和url
+    let urlObj = analyUrl(ctx, path);
+    let method = urlObj.method;
+    let url = addQuery(urlObj.url, query);
+
+    // 复制一份头信息
     let result = {};
     for (let item in headers) {
       if (headers.hasOwnProperty(item)) {
         result[item] = headers[item];
       }
     }
-
-    // 获取实际要请求的method和url
-    let method = urlObj.method;
-    let url = queryUrl(urlObj.url, query);
 
     // 配置host，先把当前用户host存入user-host,然后把请求host赋值给headers
     result['user-host'] = result.host;
@@ -194,7 +195,7 @@ function proxy(app, api, options) {
    * @param  {Object} query 当前请求的query
    * @return {String}       返回URL      
    */
-  function queryUrl(url, query) {
+  function addQuery(url, query) {
     let urlObj = url_opera.parse(url);
     let urlQue = querystring.parse(urlObj.query);
     query = query || {};

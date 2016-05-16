@@ -24,6 +24,10 @@ app.use(function*() {
     case '/favicon.ico':
       this.body = " ";
       break;
+    case '/single':
+      yield this.proxy('local:data/1')
+      break;
+
     case '/data/1':
       this.body = {
         user_id: '111111',
