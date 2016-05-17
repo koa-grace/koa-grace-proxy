@@ -3,9 +3,26 @@
 var koa = require('koa');
 var bodyparser = require('koa-bodyparser');
 var cobody = require('co-body');
+var xload = require('koa-grace-xload');
+var router = require('koa-grace-router');
 var proxy = require('..');
 
 var app = koa();
+
+// 配置api
+app.use(xload(app, {
+  path: './data',
+  upload: {
+    /*
+        encoding: 'utf-8',
+        maxFieldsSize: 2 * 1024 * 1024,
+        maxFields: 1000*/
+  },
+  download: {
+
+  }
+}));
+
 
 // 配置api
 app.use(proxy(app, {
@@ -16,7 +33,12 @@ app.use(proxy(app, {
   timeout: 15000 // 超时时间
 }));
 
-app.use(function*() {
+app.use(router(app, {
+  root: './example/controller',
+  domain: '127.0.0.1'
+}));
+
+/*app.use(function*() {
   let data;
 
   // 数据请求
@@ -24,6 +46,26 @@ app.use(function*() {
     case '/favicon.ico':
       this.body = " ";
       break;
+
+    case '/upload':
+      yield this.upload();
+      this.body = { code: 0 }
+      break;
+
+    case '/form/upload':
+      yield this.proxy('local:upload');
+      break;
+
+    case '/form':
+      this.body = '' +
+        '<form action="/form/upload" enctype="multipart/form-data" method="post">' +
+        '<input type="text" name="title"><br>' +
+        '<input type="file" name="upload1" multiple="multiple"><br>' +
+        '<input type="file" name="upload2" multiple="multiple"><br>' +
+        '<input type="submit" value="Upload">' +
+        '</form>';
+      break;
+
     case '/single':
       yield this.proxy('local:data/1')
       break;
@@ -111,7 +153,7 @@ $.get('/data/aj_post',{test:'test',test1:'test1'},function(data) {
 
 
   console.log('request done');
-});
+});*/
 
 app.listen(3000, function() {
   console.log('Listening on 3000!');

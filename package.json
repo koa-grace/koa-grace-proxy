@@ -19,7 +19,9 @@
   "devDependencies": {
     "co-body": "^4.2.0",
     "debug": "^2.2.0",
-    "koa-bodyparser": "^2.1.0"
+    "koa-bodyparser": "^2.1.0",
+    "koa-grace-router": "^1.0.28",
+    "koa-grace-xload": "^1.0.12"
   },
   "author": "wilee",
   "license": "MIT",
