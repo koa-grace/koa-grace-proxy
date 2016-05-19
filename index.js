@@ -3,7 +3,6 @@
 const http = require('http');
 const querystring = require('querystring');
 const url_opera = require('url');
-const extend = require('util')._extend;
 const coProxy = require('./lib/co-proxy');
 
 /**
@@ -58,7 +57,7 @@ function proxy(app, api, options) {
             ctx: ctx,
             needPipeReq: realReq.needPipeReq,
             needPipeRes: false
-          }, extend(options, {
+          }, Object.assign({},options, {
             uri: realReq.url,
             method: realReq.method,
             headers: realReq.headers,
@@ -92,7 +91,7 @@ function proxy(app, api, options) {
           ctx: ctx,
           needPipeReq: false,
           needPipeRes: true,
-        }, extend(options, {
+        }, Object.assign({},options, {
           uri: realReq.url,
           method: realReq.method,
           headers: realReq.headers,
@@ -200,7 +199,7 @@ function proxy(app, api, options) {
     let urlQue = querystring.parse(urlObj.query);
     query = query || {};
     // 把页面url中的请求参数和数据连接中的请求参数合并
-    urlQue = extend(query, urlQue);
+    urlQue = Object.assign({},query, urlQue);
 
     // 把合并之后参数进行stringify，作为新的参数
     let queStr = querystring.stringify(urlQue);
