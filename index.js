@@ -4,6 +4,7 @@ const http = require('http');
 const querystring = require('querystring');
 const url_opera = require('url');
 const coProxy = require('./lib/co-proxy');
+const raven = require('raven');
 
 /**
  * 
@@ -16,6 +17,12 @@ function proxy(app, api, options) {
 
   api = api || {};
   options = options || {};
+
+  let ravenClient;
+  if (options.dsn) {
+     ravenClient = new raven.Client(options.dsn);
+     delete options.dsn;
+  }
 
   return function*(next) {
     if (this.proxy) return yield next
@@ -55,9 +62,10 @@ function proxy(app, api, options) {
 
           let response = yield coProxy({
             ctx: ctx,
+            ravenClient: ravenClient,
             needPipeReq: realReq.needPipeReq,
             needPipeRes: false
-          }, Object.assign({},options, {
+          }, Object.assign({}, options, {
             uri: realReq.url,
             method: realReq.method,
             headers: realReq.headers,
@@ -89,9 +97,10 @@ function proxy(app, api, options) {
 
         let data = yield coProxy({
           ctx: ctx,
+          ravenClient: ravenClient,
           needPipeReq: false,
           needPipeRes: true,
-        }, Object.assign({},options, {
+        }, Object.assign({}, options, {
           uri: realReq.url,
           method: realReq.method,
           headers: realReq.headers,
@@ -199,7 +208,7 @@ function proxy(app, api, options) {
     let urlQue = querystring.parse(urlObj.query);
     query = query || {};
     // 把页面url中的请求参数和数据连接中的请求参数合并
-    urlQue = Object.assign({},query, urlQue);
+    urlQue = Object.assign({}, query, urlQue);
 
     // 把合并之后参数进行stringify，作为新的参数
     let queStr = querystring.stringify(urlQue);
