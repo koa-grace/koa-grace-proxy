@@ -63,7 +63,6 @@ function proxy(app, api, options) {
           let response = yield coProxy({
             ctx: ctx,
             ravenClient: ravenClient,
-            needPipeReq: realReq.needPipeReq,
             needPipeRes: false
           }, Object.assign({}, options, {
             uri: realReq.url,
@@ -98,7 +97,6 @@ function proxy(app, api, options) {
         let data = yield coProxy({
           ctx: ctx,
           ravenClient: ravenClient,
-          needPipeReq: false,
           needPipeRes: true,
         }, Object.assign({}, options, {
           uri: realReq.url,
@@ -141,20 +139,17 @@ function proxy(app, api, options) {
     result['user-host'] = result.host;
     result.host = url_opera.parse(url).host;
 
-    let needPipeReq = true;
+    // 由于字段参数发生改变，content-length不再可信删除content-length字段
+    delete result['content-length'];
     // 如果用户请求为POST，但proxy为GET，则删除头信息中不必要的字段
     if (ctx.method == 'POST' && method == 'GET') {
       delete result['content-type'];
-      delete result['content-length'];
-
-      needPipeReq = false;
     }
 
     return {
       method: method,
       url: url,
-      headers: result,
-      needPipeReq: needPipeReq
+      headers: result
     };
   }
 
