@@ -20,8 +20,8 @@ function proxy(app, api, options) {
 
   let ravenClient;
   if (options.dsn) {
-     ravenClient = new raven.Client(options.dsn);
-     delete options.dsn;
+    ravenClient = new raven.Client(options.dsn);
+    delete options.dsn;
   }
 
   return function*(next) {
@@ -104,6 +104,14 @@ function proxy(app, api, options) {
           headers: realReq.headers,
           timeout: undefined
         }));
+
+        // 设置头信息
+        let resHeaders = data[0] && data[0].headers || {};
+        for (let item in resHeaders) {
+          if (resHeaders.hasOwnProperty(item)) {
+            ctx.set(item, resHeaders[item])
+          }
+        }
 
         return data;
       }
@@ -215,6 +223,7 @@ function proxy(app, api, options) {
   }
 
   /**
+   ********** TODO: 可以优化 *********
    * 设置response cookie
    * @param {object} res     response
    * @param {object} headers 头信息
