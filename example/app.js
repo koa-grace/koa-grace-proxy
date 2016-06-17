@@ -1,13 +1,16 @@
 'use strict';
 
 var koa = require('koa');
-var bodyparser = require('koa-bodyparser');
+var body = require('koa-grace-body');
 var cobody = require('co-body');
 var xload = require('koa-grace-xload');
 var router = require('koa-grace-router');
 var proxy = require('..');
 
 var app = koa();
+
+// post获取请求参数
+app.use(body());
 
 // 配置api
 app.use(xload(app, {

@@ -22,6 +22,7 @@ exports.form = function*() {
     '</form>';
 }
 
+
 exports.single = function*() {
   yield this.proxy('local:test/data_1')
 }
@@ -48,10 +49,14 @@ exports.fetch = function*() {
   yield this.fetch('http://127.0.0.1:3000/test/data_1');
 }
 
+exports.fetch_img = function*(){
+  yield this.fetch('https://www.baidu.com/img/bd_logo1.png');
+}
+
 exports.data_post = function*() {
   this.body = {
     user_id: '444444',
-    body: this.request.body
+    body: this.request.body || '没有post参数'
   };
 
   this.cookies.set('cookie_test4_1', 'test4_1');
