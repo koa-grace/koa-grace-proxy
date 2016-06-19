@@ -102,7 +102,8 @@ function proxy(app, api, options) {
           uri: realReq.url,
           method: realReq.method,
           headers: realReq.headers,
-          timeout: undefined
+          timeout: undefined,
+          gzip: false
         }));
 
         // 设置头信息
