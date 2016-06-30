@@ -108,12 +108,12 @@ function proxy(app, api, options) {
         }));
 
         // 设置头信息
-        let resHeaders = data[0] && data[0].headers || {};
-        for (let item in resHeaders) {
-          if (resHeaders.hasOwnProperty(item)) {
-            ctx.set(item, resHeaders[item])
-          }
-        }
+        // let resHeaders = data[0] && data[0].headers || {};
+        // for (let item in resHeaders) {
+        //   if (resHeaders.hasOwnProperty(item)) {
+        //     ctx.set(item, resHeaders[item])
+        //   }
+        // }
 
         return data;
       }
