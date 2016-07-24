@@ -35,24 +35,19 @@ function proxy(app, api, options) {
     let res = ctx.res;
 
     Object.assign(this, {
-      proxy: function*(opt, destObj) {
-        if (!destObj) {
-          destObj = ctx.backData = (ctx.backData || {});
-        }
+      proxy: function*(opt, config) {
+        config = config || {}
+
+        let destObj = config.dest;
+        if (!destObj) { destObj = ctx.backData = (ctx.backData || {}) }
 
         let reqs = [];
         if (typeof opt == 'string') {
           destObj = ctx;
-          reqs.push({
-            _url: opt,
-            _dest: 'body'
-          })
+          reqs.push({ _url: opt, _dest: 'body' })
         } else {
           for (let item in opt) {
-            reqs.push({
-              _url: opt[item],
-              _dest: item
-            });
+            reqs.push({ _url: opt[item], _dest: item });
           }
         }
 
@@ -69,7 +64,7 @@ function proxy(app, api, options) {
             method: realReq.method,
             headers: realReq.headers,
             json: true
-          }));
+          }, config.conf));
 
           // 将获取到的数据注入到上下文的destObj参数中
           destObj[opt._dest] = response[1];
@@ -90,7 +85,9 @@ function proxy(app, api, options) {
        * @param {String} url           请求url
        * @yield {Object} 返回数据 
        */
-      fetch: function*(url) {
+      fetch: function*(url, config) {
+        config = config || {}
+
         // 获取头信息
         let realReq = setRequest(ctx, url);
 
@@ -105,7 +102,7 @@ function proxy(app, api, options) {
           timeout: undefined,
           gzip: false,
           encoding: null
-        }));
+        }, config.conf));
 
         // 设置头信息
         // let resHeaders = data[0] && data[0].headers || {};

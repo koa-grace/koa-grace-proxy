@@ -73,6 +73,30 @@ exports.data_aj_post = function*() {
 }
 exports.data_aj_post.__method__ = 'all';
 
+exports.timeout = function*(){
+  function getData() {
+    return function(callback) {
+      setTimeout(function() {
+
+        callback(0, {
+          message: 'this is a timeout test!'
+        });
+      }, 16000)
+    }
+  }
+
+  var data = yield getData();
+
+  this.body = data;
+}
+exports.data_timeout = function*(){
+  yield this.proxy('http://127.0.0.1:3000/test/timeout', {
+    conf: {
+      timeout: 20000
+    }
+  })
+}
+
 exports.index = function*() {
   this.cookies.set('test', 'test');
   // 代理数据
@@ -102,6 +126,10 @@ $.post('/test/data_aj_post',{test:'test',test1:'test1'},function(data) {
 });
   
 $.get('/test/data_aj_post',{test:'test',test1:'test1'},function(data) {
+  console.log(data);
+});
+  
+$.get('/test/data_timeout',function(data) {
   console.log(data);
 });
 </script>
