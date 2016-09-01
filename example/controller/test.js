@@ -27,6 +27,14 @@ exports.single = function*() {
   yield this.proxy('local:test/data_1')
 }
 
+exports.redirect = function*() {
+  this.redirect('/test/data_1')
+}
+
+exports.redirect_test = function*() {
+  yield this.proxy('local:test/redirect')
+}
+
 exports.data_1 = function*() {
   this.body = {
     user_id: '111111',
@@ -120,15 +128,15 @@ $.ajax({
         console.log(data);
       }
   });
-  
+
 $.post('/test/data_aj_post',{test:'test',test1:'test1'},function(data) {
   console.log(data);
 });
-  
+
 $.get('/test/data_aj_post',{test:'test',test1:'test1'},function(data) {
   console.log(data);
 });
-  
+
 $.get('/test/data_timeout',function(data) {
   console.log(data);
 });
