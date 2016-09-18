@@ -143,3 +143,32 @@ $.get('/test/data_timeout',function(data) {
 </script>
 `
 }
+
+exports.retry = function*() {
+  yield this.proxy({
+    'retry_1': 'local:test/proxy_retry_1',
+    'retry_2': 'local:test/proxy_retry_2'
+  })
+  this.body = {
+    'retry_1': this.backData.retry_1,
+    'retry_2': this.backData.retry_2
+  }
+}
+
+exports.proxy_retry_1 = function*() {
+  this.res.statusCode = 200;
+  if(Math.random() < 0.5) {
+    this.body = '';
+  } else {
+    this.body = '11111';
+  }
+}
+
+exports.proxy_retry_2 = function*() {
+  this.res.statusCode = 200;
+  if(Math.random() < 0.5) {
+    this.body = '';
+  } else {
+    this.body = '22222';
+  }
+}
