@@ -170,6 +170,8 @@ function proxy(app, api, options) {
     let url, method;
 
     let isUrl = /^(http:\/\/|https:\/\/)/;
+    let startSlash = /^\/*/;
+    let endSlash = /\/*$/;
     let urlReg;
 
     if (isUrl.test(path)) {
@@ -184,11 +186,11 @@ function proxy(app, api, options) {
         method = ctx.method;
         break
       case 2:
-        url = api[urlReg[0]] + urlReg[1];
+        url = api[urlReg[0]].replace(endSlash, '/') + urlReg[1].replace(startSlash, '');
         method = ctx.method;
         break;
       case 3:
-        url = api[urlReg[0]] + urlReg[2];
+        url = api[urlReg[0]].replace(endSlash, '/') + urlReg[2].replace(startSlash, '');
         method = urlReg[1].toUpperCase()
         break;
       default:
