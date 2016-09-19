@@ -257,7 +257,7 @@ function proxy(app, api, options) {
       return false
     }
 
-    if (!cookies[0] || !cookies[1]) {
+    if (!cookies[0]) {
       return false
     }
 
