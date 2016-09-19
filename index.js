@@ -229,10 +229,10 @@ function proxy(app, api, options) {
    * @param {object} headers 头信息
    */
   function setResCookies(ctx, headers) {
-    if (!headers || !headers['set-cookie']) {
+    if (!headers || !validateCookies(headers['set-cookie'])) {
       return
     }
-
+    
     let cookies = headers['set-cookie'];
 
     ctx.res._headers = ctx.res._headers || {};
@@ -245,6 +245,23 @@ function proxy(app, api, options) {
 
     // 设置头字段set-cookie的名称为set-cookie
     ctx.res._headerNames['set-cookie'] = 'set-cookie';
+  }
+
+  /**
+   * 检查cookie的合法性
+   * @param  {Array} cookies  cookies字段数组
+   * @return {Boolean}        是否合法
+   */
+  function validateCookies(cookies){
+    if (!cookies || !cookies.length || 0 >= cookies.length) {
+      return false
+    }
+
+    if (!cookies[0] || !cookies[1]) {
+      return false
+    }
+
+    return true
   }
 };
 

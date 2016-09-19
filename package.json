@@ -22,7 +22,7 @@
     "debug": "^2.2.0",
     "koa-bodyparser": "^2.1.0",
     "koa-grace-body": "^1.0.2",
-    "koa-grace-router": "^1.0.28",
+    "koa-grace-router": "^1.0.36",
     "koa-grace-xload": "^1.0.12"
   },
   "author": "wilee",
