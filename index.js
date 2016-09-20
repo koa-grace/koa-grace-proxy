@@ -170,8 +170,6 @@ function proxy(app, api, options) {
     let url, method;
 
     let isUrl = /^(http:\/\/|https:\/\/)/;
-    let startSlash = /^\/*/;
-    let endSlash = /\/*$/;
     let urlReg;
 
     if (isUrl.test(path)) {
@@ -186,11 +184,11 @@ function proxy(app, api, options) {
         method = ctx.method;
         break
       case 2:
-        url = api[urlReg[0]].replace(endSlash, '/') + urlReg[1].replace(startSlash, '');
+        url = fixUrl(api[urlReg[0]], urlReg[1]);
         method = ctx.method;
         break;
       case 3:
-        url = api[urlReg[0]].replace(endSlash, '/') + urlReg[2].replace(startSlash, '');
+        url = fixUrl(api[urlReg[0]], urlReg[2]);
         method = urlReg[1].toUpperCase()
         break;
       default:
@@ -200,6 +198,21 @@ function proxy(app, api, options) {
       url: url,
       method: method
     }
+  }
+
+  /**
+   * 将api配置和path拼合成一个真正的URL
+   * @param  {String} api  api配置
+   * @param  {String} path 请求路径 
+   * @return {String}      完整的请求路径
+   */
+  function fixUrl(api, path) {
+    if (!api || !path) return;
+
+    let startSlash = /^\/*/;
+    let endSlash = /\/*$/;
+
+    return api.replace(endSlash, '/') + path.replace(startSlash, '')
   }
 
   /**
@@ -234,7 +247,7 @@ function proxy(app, api, options) {
     if (!headers || !validateCookies(headers['set-cookie'])) {
       return
     }
-    
+
     let cookies = headers['set-cookie'];
 
     ctx.res._headers = ctx.res._headers || {};
@@ -254,7 +267,7 @@ function proxy(app, api, options) {
    * @param  {Array} cookies  cookies字段数组
    * @return {Boolean}        是否合法
    */
-  function validateCookies(cookies){
+  function validateCookies(cookies) {
     if (!cookies || !cookies.length || 0 >= cookies.length) {
       return false
     }
