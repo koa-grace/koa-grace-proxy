@@ -51,9 +51,20 @@ function proxy(app, api, options) {
           }
         }
 
+        // 保存后端接口配置
+        ctx.__back__ = ctx.__back__ ? ctx.__back__ : {};
+        if (typeof opt == 'string') {
+          let url = setRequest(ctx, opt).url;
+          ctx.__back__[url_opera.parse(url).pathname] = url;
+        }
+
         function* _proxy(opt) {
           // 分析当前proxy请求的URL
           let realReq = setRequest(ctx, opt._url);
+          // 保存后端接口配置
+          if (destObj != ctx) {
+            ctx.__back__[opt._dest] = realReq.url;
+          }
 
           let response = yield coProxy({
             ctx: ctx,
