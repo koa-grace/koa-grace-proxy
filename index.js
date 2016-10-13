@@ -51,20 +51,9 @@ function proxy(app, api, options) {
           }
         }
 
-        // 保存后端接口配置
-        ctx.__back__ = ctx.__back__ ? ctx.__back__ : {};
-        if (typeof opt == 'string') {
-          let url = setRequest(ctx, opt).url;
-          ctx.__back__[url_opera.parse(url).pathname] = url;
-        }
-
         function* _proxy(opt) {
           // 分析当前proxy请求的URL
           let realReq = setRequest(ctx, opt._url);
-          // 保存后端接口配置
-          if (destObj != ctx) {
-            ctx.__back__[opt._dest] = realReq.url;
-          }
 
           let response = yield coProxy({
             ctx: ctx,
@@ -84,6 +73,9 @@ function proxy(app, api, options) {
           let proxyResponse = response[0] || {};
           let proxyHeaders = proxyResponse.headers;
           setResCookies(ctx, proxyHeaders)
+
+          // 获取后端api配置
+          setApiOpt(ctx, destObj, realReq.url, opt._dest);
 
           return destObj;
         }
@@ -128,6 +120,20 @@ function proxy(app, api, options) {
     });
 
     yield next;
+
+    // 返回后端api数据
+    if(config.site.env !== 'production') {
+      switch(true) {
+        case /__api__$/.test(ctx.req.url):
+          let back = ctx.__back__ || {};
+          ctx.set('X-Back-Api', JSON.stringify(back))
+          break;
+        case /__data__$/.test(ctx.req.url):
+          ctx.body = ctx.backData;
+          break;
+      }
+    }
+
   };
 
 
@@ -205,6 +211,7 @@ function proxy(app, api, options) {
       default:
         throw 'wrong proxy url path!';
     }
+
     return {
       url: url,
       method: method
@@ -288,6 +295,26 @@ function proxy(app, api, options) {
     }
 
     return true
+  }
+
+  /**
+   * 保存后端api配置信息
+   * @param  {Object} ctx  koa 上下文
+   * @param  {Object} data api 数据
+   * @param  {String} url  api URL
+   * @param  {String} key  api 字段名
+   * @return {}
+   */
+  function setApiOpt(ctx, data, url, key) {
+
+    // 保存后端api配置
+    ctx.__back__ = ctx.__back__ ? ctx.__back__ : {};
+    if(data == ctx) {
+      ctx.__back__[url_opera.parse(url).pathname] = url.replace(/__api__(=[^&]*)?/, '');
+    } else {
+      ctx.__back__[key] = url;
+    }
+
   }
 };
 
