@@ -18,12 +18,6 @@ function proxy(app, api, options) {
   api = api || {};
   options = options || {};
 
-  let ravenClient;
-  if (options.dsn) {
-    ravenClient = new raven.Client(options.dsn);
-    delete options.dsn;
-  }
-
   return function*(next) {
     if (this.proxy) return yield next
       /**
@@ -33,6 +27,9 @@ function proxy(app, api, options) {
     let ctx = this;
     let req = ctx.req;
     let res = ctx.res;
+
+    // 如果配置了allowShowApi而且页面的URL以__data__结尾则命中debug模式
+    let isDebug = options.allowShowApi && /__data__$/.test(ctx.req.url);
 
     Object.assign(this, {
       proxy: function*(opt, config) {
@@ -57,7 +54,6 @@ function proxy(app, api, options) {
 
           let response = yield coProxy({
             ctx: ctx,
-            ravenClient: ravenClient,
             needPipeRes: false
           }, Object.assign({}, options, {
             uri: realReq.url,
@@ -75,7 +71,7 @@ function proxy(app, api, options) {
           setResCookies(ctx, proxyHeaders)
 
           // 获取后端api配置
-          setApiOpt(ctx, destObj, realReq.url, opt._dest);
+          isDebug && setApiOpt(ctx, realReq.url, response[1], proxyResponse.headers);
 
           return destObj;
         }
@@ -96,7 +92,6 @@ function proxy(app, api, options) {
 
         let data = yield coProxy({
           ctx: ctx,
-          ravenClient: ravenClient,
           needPipeRes: true,
         }, Object.assign({}, options, {
           uri: realReq.url,
@@ -121,19 +116,10 @@ function proxy(app, api, options) {
 
     yield next;
 
-    // 返回后端api数据
-    if(config.site.env !== 'production') {
-      switch(true) {
-        case /__api__$/.test(ctx.req.url):
-          let back = ctx.__back__ || {};
-          ctx.set('X-Back-Api', JSON.stringify(back))
-          break;
-        case /__data__$/.test(ctx.req.url):
-          ctx.body = ctx.backData;
-          break;
-      }
+    // debug模式下，返回后端api数据
+    if (isDebug && ctx.__back__) {
+      ctx.body = ctx.__back__
     }
-
   };
 
 
@@ -300,21 +286,22 @@ function proxy(app, api, options) {
   /**
    * 保存后端api配置信息
    * @param  {Object} ctx  koa 上下文
-   * @param  {Object} data api 数据
    * @param  {String} url  api URL
-   * @param  {String} key  api 字段名
+   * @param  {Object} data api 数据
+   * * @param  {Object} headers 返回头信息
    * @return {}
    */
-  function setApiOpt(ctx, data, url, key) {
-
+  function setApiOpt(ctx, url, data, headers) {
     // 保存后端api配置
-    ctx.__back__ = ctx.__back__ ? ctx.__back__ : {};
-    if(data == ctx) {
-      ctx.__back__[url_opera.parse(url).pathname] = url.replace(/__api__(=[^&]*)?/, '');
-    } else {
-      ctx.__back__[key] = url;
+    ctx.__back__ = ctx.__back__ || {};
+
+    ctx.__back__[url] = {
+      url: url,
+      data: data,
+      headers: headers
     }
 
+    return
   }
 };
 
