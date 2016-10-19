@@ -1,6 +1,6 @@
 {
   "name": "koa-grace-proxy",
-  "version": "1.0.40",
+  "version": "1.0.41",
   "description": "KOA-grace proxy/fetch请求、的中间件",
   "main": "index.js",
   "scripts": {
