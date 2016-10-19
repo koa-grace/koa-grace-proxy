@@ -59,7 +59,8 @@ function proxy(app, api, options) {
             uri: realReq.url,
             method: realReq.method,
             headers: realReq.headers,
-            json: true
+            json: true,
+            form: config.form || ctx.request.body
           }, config.conf));
 
           // 将获取到的数据注入到上下文的destObj参数中
@@ -99,7 +100,8 @@ function proxy(app, api, options) {
           headers: realReq.headers,
           timeout: undefined,
           gzip: false,
-          encoding: null
+          encoding: null,
+          form: config.form || ctx.request.body
         }, config.conf));
 
         // 设置头信息
